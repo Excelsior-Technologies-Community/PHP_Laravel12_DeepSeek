@@ -478,15 +478,15 @@ You can now open the application in the browser and interact with the DeepSeek A
 ### Main Page:
 
 
-<img src="screenshots/Screenshot 2026-03-16 102001.png" width="900">
+<img src="Screenshot/Screenshot 2026-03-16 102001.png" width="900">
 
 
 ### Write Prompt:
 
 
-<img src="screenshots/Screenshot 2026-03-16 104937.png" width="900">
+<img src="Screenshot/Screenshot 2026-03-16 104937.png" width="900">
 
-<img src="screenshots/Screenshot 2026-03-16 104954.png" width="900">
+<img src="Screenshot/Screenshot 2026-03-16 104954.png" width="900">
 
 
 
