@@ -1,811 +1,1123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" id="html-root">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>DeepSeek AI Assistant - Smart AI Chatbot</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>DeepSeek AI Assistant</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
+        :root {
+            --bg:       #0d1117;
+            --surface:  #161b22;
+            --surface2: #21262d;
+            --border:   #30363d;
+            --text:     #e6edf3;
+            --muted:    #7d8590;
+            --accent:   #7c3aed;
+            --accent2:  #6366f1;
+            --green:    #10b981;
+            --red:      #ef4444;
+            --yellow:   #f59e0b;
         }
+        .light {
+            --bg:       #f6f8fa;
+            --surface:  #ffffff;
+            --surface2: #f0f3f6;
+            --border:   #d0d7de;
+            --text:     #1f2328;
+            --muted:    #656d76;
+            --accent:   #7c3aed;
+            --accent2:  #4f46e5;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background: #0f172a;
-            color: white;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 20px;
-            transition: 0.3s;
+            transition: background .3s, color .2s;
         }
 
-        body.light {
-            background: #f3f4f6;
-            color: #111827;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: auto;
-        }
-
-        /* Header Styles */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .logo h1 {
-            font-size: 28px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .logo p {
-            font-size: 12px;
-            opacity: 0.7;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        /* Card Styles */
-        .card {
-            background: #1e293b;
-            border-radius: 20px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            transition: 0.3s;
-        }
-
-        body.light .card {
-            background: white;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        }
-
-        /* Stats Grid */
-        .stats-grid {
+        /* ── App Layout ── */
+        .app-layout {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 25px;
+            grid-template-columns: 280px 1fr;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .stat-card {
-            background: linear-gradient(135deg, #1e293b, #334155);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            transition: transform 0.3s;
+        /* ── Sidebar ── */
+        .sidebar {
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 20px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            height: 100vh;
+            overflow-y: auto;
         }
 
-        .stat-card:hover {
-            transform: translateY(-5px);
+        .sidebar-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px 8px;
         }
-
-        body.light .stat-card {
-            background: linear-gradient(135deg, #ffffff, #f3f4f6);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        .logo-icon {
+            width: 38px; height: 38px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, var(--accent2), var(--accent));
+            display: flex; align-items: center; justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
         }
+        .sidebar-logo h2 { font-size: 16px; font-weight: 700; line-height: 1.2; }
+        .sidebar-logo p  { font-size: 11px; color: var(--muted); }
 
-        .stat-card i {
-            font-size: 30px;
-            color: #8b5cf6;
-            margin-bottom: 10px;
-        }
-
-        .stat-number {
-            font-size: 28px;
+        .section-label {
+            font-size: 10px;
             font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            padding: 0 8px;
+            margin-bottom: 6px;
         }
 
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.7;
-            margin-top: 5px;
-        }
-
-        /* Form Styles */
-        textarea {
-            width: 100%;
-            padding: 18px;
-            border: 2px solid #334155;
-            border-radius: 15px;
-            background: #0f172a;
-            color: white;
-            font-size: 15px;
-            resize: vertical;
-            transition: 0.3s;
-        }
-
-        textarea:focus {
-            outline: none;
-            border-color: #8b5cf6;
-            box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
-        }
-
-        body.light textarea {
-            background: white;
-            color: #111827;
-            border-color: #d1d5db;
-        }
-
-        /* Button Styles */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.3s;
-            display: inline-flex;
+        .stat-row {
+            display: flex;
             align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
-        }
-
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        .btn-secondary {
-            background: #334155;
-            color: white;
-        }
-
-        body.light .btn-secondary {
-            background: #e5e7eb;
-            color: #111827;
-        }
-
-        /* Search & Filter */
-        .search-filter {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .search-box {
-            flex: 1;
-            position: relative;
-        }
-
-        .search-box input {
-            width: 100%;
-            padding: 12px 40px 12px 15px;
-            border: 2px solid #334155;
-            border-radius: 12px;
-            background: #0f172a;
-            color: white;
-        }
-
-        body.light .search-box input {
-            background: white;
-            border-color: #d1d5db;
-            color: #111827;
-        }
-
-        .search-box i {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #8b5cf6;
-        }
-
-        .filter-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .filter-btn {
-            padding: 12px 20px;
-            background: #334155;
-            border: none;
-            border-radius: 12px;
-            color: white;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .filter-btn.active {
-            background: #8b5cf6;
-        }
-
-        body.light .filter-btn {
-            background: #e5e7eb;
-            color: #111827;
-        }
-
-        /* Response Area */
-        .response {
-            background: #334155;
-            padding: 25px;
-            border-radius: 15px;
-            margin-top: 20px;
-            line-height: 1.8;
-        }
-
-        body.light .response {
-            background: #f9fafb;
-        }
-
-        /* History Items */
-        .history-item {
-            background: #334155;
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 15px;
-            transition: 0.3s;
-        }
-
-        .history-item:hover {
-            transform: translateX(5px);
-        }
-
-        body.light .history-item {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-        }
-
-        .history-header {
-            display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-            gap: 10px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            background: var(--surface2);
+            font-size: 13px;
+            margin-bottom: 6px;
         }
+        .stat-row .s-label { color: var(--muted); }
+        .stat-row .s-value { font-weight: 700; color: var(--accent2); }
+        .stat-row .s-value.danger { color: var(--red); }
 
-        .badge {
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .badge-success {
-            background: #10b981;
-            color: white;
-        }
-
-        .badge-danger {
-            background: #ef4444;
-            color: white;
-        }
-
-        .history-actions {
+        .sidebar-btn {
             display: flex;
+            align-items: center;
             gap: 8px;
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 8px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+            transition: .2s;
+            font-family: inherit;
+            text-align: left;
+            margin-bottom: 6px;
+        }
+        .sidebar-btn:hover { background: var(--surface2); }
+        .sidebar-btn.danger { border-color: rgba(239,68,68,.5); color: var(--red); }
+        .sidebar-btn.danger:hover { background: rgba(239,68,68,.08); }
+
+        .recent-chats { flex: 1; overflow-y: auto; min-height: 0; }
+
+        .history-card {
+            padding: 9px 11px;
+            border-radius: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: .2s;
+            margin-bottom: 5px;
+        }
+        .history-card:hover { border-color: var(--accent2); background: var(--surface); }
+        .hc-prompt {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+        .hc-meta { display: flex; align-items: center; gap: 6px; }
+        .hc-badge {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 1px 7px;
+            border-radius: 20px;
+        }
+        .hc-badge.done { background: rgba(16,185,129,.15); color: var(--green); }
+        .hc-badge.fail { background: rgba(239,68,68,.15);  color: var(--red); }
+        .hc-badge.proc { background: rgba(245,158,11,.15); color: var(--yellow); }
+        .hc-time { font-size: 11px; color: var(--muted); }
+
+        /* ── Main Panel ── */
+        .main-panel {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ── Topbar ── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 20px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
+        .topbar-title { font-size: 15px; font-weight: 600; white-space: nowrap; }
+
+        .model-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 7px 12px;
+            font-size: 13px;
+            color: var(--text);
+        }
+        .model-pill select {
+            background: transparent;
+            border: none;
+            color: var(--text);
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            cursor: pointer;
+        }
+        .model-pill select option { background: var(--surface); }
+
+        .m-badge {
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--accent2), var(--accent));
+            color: white;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex-shrink: 0;
+        }
+        .search-wrap input {
+            width: 180px;
+            padding: 7px 32px 7px 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            transition: .2s;
+        }
+        .search-wrap input:focus { border-color: var(--accent2); }
+        .search-wrap i {
+            position: absolute;
+            right: 10px; top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 12px;
+            pointer-events: none;
         }
 
         .icon-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            padding: 5px;
+            width: 34px; height: 34px;
             border-radius: 8px;
-            transition: 0.3s;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 15px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: .2s;
+            flex-shrink: 0;
         }
+        .icon-btn:hover { background: var(--border); }
 
-        .icon-btn:hover {
-            background: rgba(139, 92, 246, 0.2);
-        }
-
-        /* Pagination */
-        .pagination {
+        /* ── Messages Area ── */
+        .messages-wrap {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        /* ── Welcome Screen ── */
+        .welcome {
+            margin: auto;
+            text-align: center;
+            padding: 40px 20px;
+            max-width: 480px;
+        }
+        .welcome-icon { font-size: 52px; margin-bottom: 14px; }
+        .welcome h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+        .welcome p { font-size: 14px; color: var(--muted); margin-bottom: 20px; line-height: 1.6; }
+        .suggestions { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+        .suggestion-chip {
+            padding: 8px 16px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+            transition: .2s;
+            font-family: inherit;
+        }
+        .suggestion-chip:hover { border-color: var(--accent2); background: var(--surface); }
+
+        /* ── Message Row ── */
+        .msg-row {
+            display: flex;
             gap: 10px;
-            margin-top: 20px;
+            margin-bottom: 18px;
+            width: 100%;
+        }
+
+        /* User messages: right aligned */
+        .msg-row.user {
+            flex-direction: row-reverse;
+            justify-content: flex-start;
+        }
+
+        /* AI messages: left aligned */
+        .msg-row.ai {
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+        .msg-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+            align-self: flex-start;
+            margin-top: 2px;
+        }
+        .msg-row.user  .msg-avatar { background: linear-gradient(135deg, var(--accent2), var(--accent)); }
+        .msg-row.ai    .msg-avatar { background: var(--surface2); border: 1px solid var(--border); }
+
+        .msg-content { max-width: 70%; display: flex; flex-direction: column; }
+        .msg-row.user .msg-content { align-items: flex-end; }
+        .msg-row.ai   .msg-content { align-items: flex-start; }
+
+        .msg-bubble {
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 14px;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-width: 100%;
+        }
+
+        /* User bubble: purple gradient, right side */
+        .msg-row.user .msg-bubble {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        /* AI bubble: dark surface, left side */
+        .msg-row.ai .msg-bubble {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-bottom-left-radius: 4px;
+        }
+
+        .msg-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 5px;
+            font-size: 11px;
+            color: var(--muted);
             flex-wrap: wrap;
         }
 
-        .pagination a, .pagination span {
-            padding: 8px 15px;
-            background: #334155;
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            font-size: 11px;
+            cursor: pointer;
+            padding: 2px 6px;
+            border-radius: 5px;
+            transition: .2s;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+        }
+        .action-btn:hover { background: var(--border); color: var(--text); }
+
+        /* ── Typing dots ── */
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            padding: 4px 0;
+        }
+        .typing-dots span {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: tdot 1.2s infinite ease-in-out;
+        }
+        .typing-dots span:nth-child(2) { animation-delay: .2s; }
+        .typing-dots span:nth-child(3) { animation-delay: .4s; }
+        @keyframes tdot { 0%,80%,100%{transform:scale(0)} 40%{transform:scale(1)} }
+
+        /* Streaming cursor */
+        .streaming-cursor::after {
+            content: '▋';
+            color: var(--accent);
+            animation: cblink .7s infinite;
+        }
+        @keyframes cblink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+        /* ── Flash ── */
+        .flash {
+            padding: 11px 14px;
+            border-radius: 9px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .flash.success { background: rgba(16,185,129,.12); border: 1px solid rgba(16,185,129,.25); color: var(--green); }
+        .flash.error   { background: rgba(239,68,68,.12);  border: 1px solid rgba(239,68,68,.25);  color: var(--red); }
+
+        /* ── Input Area ── */
+        .input-area {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 14px 20px;
+            flex-shrink: 0;
+        }
+
+        .voice-bar {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--red);
+            margin-bottom: 8px;
+        }
+        .voice-bar.show { display: flex; }
+        .v-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: var(--red);
+            animation: vpulse 1s infinite;
+        }
+        @keyframes vpulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+        .input-box {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            background: var(--surface2);
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 10px 12px;
+            transition: border-color .2s;
+        }
+        .input-box:focus-within { border-color: var(--accent2); }
+
+        .inp-btn {
+            width: 34px; height: 34px;
             border-radius: 8px;
-            text-decoration: none;
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--muted);
+            font-size: 15px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: .2s;
+            flex-shrink: 0;
+        }
+        .inp-btn:hover { border-color: var(--accent2); color: var(--text); }
+        .inp-btn:disabled { opacity: .4; cursor: not-allowed; }
+
+        .inp-btn#voice-btn.recording {
+            background: rgba(239,68,68,.15);
+            border-color: var(--red);
+            color: var(--red);
+            animation: rpulse 1.5s infinite;
+        }
+        @keyframes rpulse { 0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.3)} 50%{box-shadow:0 0 0 7px rgba(239,68,68,0)} }
+
+        .inp-btn#tts-btn.active { color: var(--green); border-color: var(--green); }
+
+        #send-btn {
+            background: linear-gradient(135deg, var(--accent2), var(--accent));
+            border-color: transparent;
             color: white;
-            transition: 0.3s;
         }
+        #send-btn:hover:not(:disabled) { transform: scale(1.06); border-color: transparent; }
 
-        body.light .pagination a, body.light .pagination span {
-            background: #e5e7eb;
-            color: #111827;
+        #prompt-input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 14px;
+            font-family: inherit;
+            resize: none;
+            outline: none;
+            min-height: 22px;
+            max-height: 140px;
+            line-height: 1.55;
         }
+        #prompt-input::placeholder { color: var(--muted); }
 
-        .pagination a:hover {
-            background: #8b5cf6;
-        }
-
-        /* Alert Messages */
-        .alert {
-            padding: 15px 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
+        .input-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-top: 7px;
+            font-size: 11px;
+            color: var(--muted);
         }
+        #char-count.warn { color: var(--yellow); }
 
-        .alert-success {
-            background: #10b981;
-            color: white;
-        }
-
-        .alert-error {
-            background: #ef4444;
-            color: white;
-        }
-
-        /* Toggle Button */
-        .toggle-mode {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-size: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-        }
-
-        /* Modal */
-        .modal {
+        /* ── Share Modal ── */
+        .modal-overlay {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            inset: 0;
+            background: rgba(0,0,0,.55);
+            z-index: 200;
             justify-content: center;
             align-items: center;
-            z-index: 2000;
+        }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 26px;
+            max-width: 460px;
+            width: 92%;
+        }
+        .modal-box h3 { font-size: 17px; margin-bottom: 8px; }
+        .modal-box p  { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+        .modal-input {
+            width: 100%;
+            padding: 9px 12px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 9px;
+            color: var(--text);
+            font-size: 13px;
+            font-family: inherit;
+            margin-bottom: 16px;
+        }
+        .modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+        .modal-btn {
+            padding: 8px 18px;
+            border-radius: 9px;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: inherit;
+            border: 1px solid var(--border);
+            background: var(--surface2);
+            color: var(--text);
+            transition: .2s;
+        }
+        .modal-btn.primary {
+            background: linear-gradient(135deg, var(--accent2), var(--accent));
+            border-color: transparent;
+            color: white;
         }
 
-        .modal-content {
-            background: #1e293b;
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 500px;
-            width: 90%;
-        }
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-        body.light .modal-content {
-            background: white;
-        }
-
-        .modal-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: flex-end;
-            margin-top: 25px;
-        }
-
+        /* ── Responsive ── */
         @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .header {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .history-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .typing-indicator {
-            display: flex;
-            gap: 5px;
-            padding: 15px;
-        }
-
-        .typing-indicator span {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #8b5cf6;
-            animation: bounce 1.4s infinite ease-in-out;
-        }
-
-        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes bounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
-        }
-
-        .loader {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
+            .app-layout { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .msg-content { max-width: 88%; }
         }
     </style>
 </head>
 <body>
 
-<button class="toggle-mode" onclick="toggleMode()">
-    <i class="fas fa-moon"></i>
-</button>
+<div class="app-layout">
 
-<div class="container">
-    <!-- Header -->
-    <div class="header">
-        <div class="logo">
-            <h1><i class="fas fa-robot"></i> DeepSeek AI</h1>
-            <p>Advanced AI Assistant powered by DeepSeek</p>
+    {{-- ════════════ SIDEBAR ════════════ --}}
+    <aside class="sidebar">
+
+        <div class="sidebar-logo">
+            <div class="logo-icon">🤖</div>
+            <div>
+                <h2>DeepSeek AI</h2>
+                <p>Powered by DeepSeek API</p>
+            </div>
         </div>
-        <div class="header-actions">
-            <button class="btn btn-secondary" onclick="exportHistory()">
-                <i class="fas fa-download"></i> Export CSV
+
+        {{-- Stats --}}
+        <div>
+            <div class="section-label">Analytics</div>
+            <div class="stat-row">
+                <span class="s-label">Total Chats</span>
+                <span class="s-value">{{ $stats['total_chats'] }}</span>
+            </div>
+            <div class="stat-row">
+                <span class="s-label">Today</span>
+                <span class="s-value">{{ $stats['today_chats'] }}</span>
+            </div>
+            <div class="stat-row">
+                <span class="s-label">Tokens Used</span>
+                <span class="s-value">{{ number_format($stats['total_tokens']) }}</span>
+            </div>
+            <div class="stat-row">
+                <span class="s-label">Failed</span>
+                <span class="s-value danger">{{ $stats['failed_count'] }}</span>
+            </div>
+        </div>
+
+        {{-- Actions --}}
+        <div>
+            <div class="section-label">Actions</div>
+            <button class="sidebar-btn" onclick="location.href='{{ route('deepseek.export') }}'">
+                <i class="fas fa-download" style="color:var(--accent2)"></i> Export CSV
             </button>
-            <button class="btn btn-danger" onclick="confirmClearAll()">
-                <i class="fas fa-trash-alt"></i> Clear All
+            <button class="sidebar-btn danger" onclick="confirmClearAll()">
+                <i class="fas fa-trash-alt"></i> Clear All History
             </button>
         </div>
-    </div>
 
-    <!-- Alert Messages -->
-    @if(session('success'))
-        <div class="alert alert-success">
-            <span><i class="fas fa-check-circle"></i> {{ session('success') }}</span>
-            <i class="fas fa-times" style="cursor: pointer;" onclick="this.parentElement.remove()"></i>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-error">
-            <span><i class="fas fa-exclamation-circle"></i> {{ session('error') }}</span>
-            <i class="fas fa-times" style="cursor: pointer;" onclick="this.parentElement.remove()"></i>
-        </div>
-    @endif
-
-    @if($errors->any())
-        <div class="alert alert-error">
-            <span><i class="fas fa-exclamation-circle"></i> {{ $errors->first() }}</span>
-            <i class="fas fa-times" style="cursor: pointer;" onclick="this.parentElement.remove()"></i>
-        </div>
-    @endif
-
-   
-
-    <!-- Main Chat Card -->
-    <div class="card">
-        <form method="POST" action="{{ route('deepseek.process') }}" onsubmit="showLoader(event)">
-            @csrf
-            <textarea 
-                name="prompt" 
-                placeholder="Ask me anything! I can help with coding, analysis, writing, research, and more..."
-                rows="4"
-            >{{ old('prompt') ?? ($prompt ?? '') }}</textarea>
-            
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; flex-wrap: wrap; gap: 10px;">
-                <div style="font-size: 12px; opacity: 0.7;">
-                    <i class="fas fa-info-circle"></i> Powered by DeepSeek AI Model
+        {{-- Recent Chats --}}
+        <div class="recent-chats">
+            <div class="section-label">Recent Chats</div>
+            @foreach($histories->take(10) as $h)
+                <div class="history-card" onclick="location.href='{{ route('deepseek.result', $h->id) }}'">
+                    <div class="hc-prompt">{{ Str::limit($h->prompt, 45) }}</div>
+                    <div class="hc-meta">
+                        <span class="hc-badge {{ $h->status === 'completed' ? 'done' : ($h->status === 'failed' ? 'fail' : 'proc') }}">
+                            {{ ucfirst($h->status) }}
+                        </span>
+                        <span class="hc-time">{{ $h->created_at->diffForHumans() }}</span>
+                    </div>
                 </div>
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-paper-plane"></i> Generate Response
+            @endforeach
+        </div>
+
+    </aside>
+
+    {{-- ════════════ MAIN PANEL ════════════ --}}
+    <div class="main-panel">
+
+        {{-- Topbar --}}
+        <header class="topbar">
+            <span class="topbar-title">💬 AI Chat Assistant</span>
+
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+
+                {{-- Model Selector --}}
+                <div class="model-pill">
+                    <i class="fas fa-microchip" style="color:var(--accent); font-size:12px;"></i>
+                    <select id="model-selector" onchange="updateModelBadge()">
+                        <option value="deepseek-chat">DeepSeek Chat</option>
+                        <option value="deepseek-reasoner">DeepSeek R1 (Reasoning)</option>
+                    </select>
+                    <span class="m-badge" id="model-badge">Fast</span>
+                </div>
+
+                {{-- Search --}}
+                <form method="GET" action="/">
+                    <div class="search-wrap">
+                        <input type="text" name="search" placeholder="Search history…" value="{{ request('search') }}">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </form>
+
+                {{-- Theme --}}
+                <button class="icon-btn" id="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+
+            </div>
+        </header>
+
+        {{-- Messages --}}
+        <div class="messages-wrap" id="messages-wrap">
+
+            {{-- Flash --}}
+            @if(session('success'))
+                <div class="flash success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>
+            @endif
+            @if(session('error'))
+                <div class="flash error"><i class="fas fa-exclamation-circle"></i> {{ session('error') }}</div>
+            @endif
+
+            @if(isset($result) && $result)
+
+                {{-- ── User Message ── --}}
+                <div class="msg-row user">
+                    <div class="msg-avatar">👤</div>
+                    <div class="msg-content">
+                        <div class="msg-bubble">{{ $prompt ?? '' }}</div>
+                        <div class="msg-meta">
+                            @isset($currentChat) {{ $currentChat->model_used }} • @endisset
+                            {{ isset($currentChat) ? $currentChat->created_at->diffForHumans() : 'Just now' }}
+                        </div>
+                    </div>
+                </div>
+
+                {{-- ── AI Response ── --}}
+                <div class="msg-row ai">
+                    <div class="msg-avatar">🤖</div>
+                    <div class="msg-content">
+                        <div class="msg-bubble" id="current-response">{{ $result }}</div>
+                        <div class="msg-meta">
+                            <button class="action-btn" onclick="copyText('current-response')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                            <button class="action-btn" onclick="speakText(document.getElementById('current-response').innerText)">
+                                <i class="fas fa-volume-up"></i> Listen
+                            </button>
+                            @isset($currentChat)
+                                <button class="action-btn" onclick="shareChat({{ $currentChat->id }})">
+                                    <i class="fas fa-share-alt"></i> Share
+                                </button>
+                            @endisset
+                        </div>
+                    </div>
+                </div>
+
+            @else
+
+                {{-- Welcome --}}
+                <div class="welcome" id="welcome-screen">
+                    <div class="welcome-icon">🤖</div>
+                    <h2>DeepSeek AI Assistant</h2>
+                    <p>Ask me anything! I can help with coding, analysis, writing, research, and much more.</p>
+                    <div class="suggestions">
+                        @foreach(['Explain quantum computing', 'Write a Python script', 'Help me debug Laravel', 'What is machine learning?', 'Write a cover letter'] as $s)
+                            <button class="suggestion-chip" onclick="setPrompt('{{ $s }}')">{{ $s }}</button>
+                        @endforeach
+                    </div>
+                </div>
+
+            @endif
+
+            {{-- Live Streaming Area (shown while streaming) --}}
+            <div id="stream-row" style="display:none;">
+
+                {{-- User question (shown during stream) --}}
+                <div class="msg-row user" id="stream-user-row">
+                    <div class="msg-avatar">👤</div>
+                    <div class="msg-content">
+                        <div class="msg-bubble" id="stream-user-text"></div>
+                        <div class="msg-meta" id="stream-user-meta"></div>
+                    </div>
+                </div>
+
+                {{-- AI streaming response --}}
+                <div class="msg-row ai">
+                    <div class="msg-avatar">🤖</div>
+                    <div class="msg-content">
+                        <div class="msg-bubble streaming-cursor" id="stream-output"></div>
+                        <div id="typing-wrap" style="margin-top:6px;">
+                            <div class="typing-dots" id="typing-dots">
+                                <span></span><span></span><span></span>
+                            </div>
+                        </div>
+                        <div class="msg-meta" id="stream-actions" style="display:none;">
+                            <button class="action-btn" onclick="copyText('stream-output')">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                            <button class="action-btn" onclick="speakText(document.getElementById('stream-output').innerText)">
+                                <i class="fas fa-volume-up"></i> Listen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        {{-- Input Area --}}
+        <div class="input-area">
+
+            <div class="voice-bar" id="voice-bar">
+                <div class="v-dot"></div>
+                <span id="voice-bar-text">Listening…</span>
+            </div>
+
+            <div class="input-box">
+                <button class="inp-btn" id="voice-btn" onclick="toggleVoice()" title="Voice input (Speech-to-Text)">🎤</button>
+
+                <textarea
+                    id="prompt-input"
+                    placeholder="Ask me anything… (Enter to send, Shift+Enter for new line)"
+                    rows="1"
+                    maxlength="5000"
+                >{{ session('retry_prompt', '') }}</textarea>
+
+                <button class="inp-btn" id="tts-btn" onclick="toggleTTS()" title="Toggle auto Text-to-Speech">🔊</button>
+
+                <button class="inp-btn" id="send-btn" onclick="sendMessage()" title="Send">
+                    <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
-        </form>
 
-        <div class="loader" id="loader">
-            <div class="typing-indicator">
-                <span></span>
-                <span></span>
-                <span></span>
+            <div class="input-footer">
+                <span>🎤 Mic = voice input &nbsp;|&nbsp; 🔊 Speaker = auto-read responses</span>
+                <span id="char-count">0 / 5000</span>
             </div>
-            <p>AI is generating response...</p>
+
         </div>
 
-        @if(isset($result))
-            <div class="response">
-                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                    <h3 style="display: flex; align-items: center; gap: 10px;">
-                        <i class="fas fa-robot" style="color: #8b5cf6;"></i> 
-                        AI Response
-                    </h3>
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn btn-secondary" onclick="copyText()" style="padding: 8px 16px;">
-                            <i class="fas fa-copy"></i> Copy
-                        </button>
-                        @if(isset($currentChat))
-                            <button class="btn btn-secondary" onclick="shareChat({{ $currentChat->id }})" style="padding: 8px 16px;">
-                                <i class="fas fa-share-alt"></i> Share
-                            </button>
-                        @endif
-                    </div>
-                </div>
-                <div id="aiText" style="white-space: pre-wrap; line-height: 1.6;">{{ $result }}</div>
-            </div>
-        @endif
-    </div>
-
-    <!-- Chat History Section -->
-    <div class="card">
-        <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-history"></i> Chat History
-        </h2>
-        
-        <!-- Search and Filter -->
-        <div class="search-filter">
-            <div class="search-box">
-                <form method="GET" action="{{ route('deepseek.form') }}" id="searchForm">
-                    <input type="text" name="search" placeholder="Search conversations..." value="{{ request('search') }}">
-                    <i class="fas fa-search"></i>
-                    <input type="hidden" name="filter" value="{{ request('filter', 'all') }}">
-                </form>
-            </div>
-            <div class="filter-buttons">
-                <button class="filter-btn {{ request('filter', 'all') == 'all' ? 'active' : '' }}" onclick="filterHistory('all')">All</button>
-                <button class="filter-btn {{ request('filter') == 'completed' ? 'active' : '' }}" onclick="filterHistory('completed')">Success</button>
-                <button class="filter-btn {{ request('filter') == 'failed' ? 'active' : '' }}" onclick="filterHistory('failed')">Failed</button>
-            </div>
-        </div>
-
-        @forelse($histories as $history)
-            <div class="history-item">
-                <div class="history-header">
-                    <div>
-                        <span class="badge {{ $history->status == 'completed' ? 'badge-success' : 'badge-danger' }}">
-                            {{ ucfirst($history->status) }}
-                        </span>
-                        <span style="font-size: 11px; margin-left: 10px;">
-                            <i class="far fa-clock"></i> {{ $history->created_at->diffForHumans() }}
-                        </span>
-                        @if($history->tokens_used)
-                            <span style="font-size: 11px; margin-left: 10px;">
-                                <i class="fas fa-microchip"></i> {{ number_format($history->tokens_used) }} tokens
-                            </span>
-                        @endif
-                    </div>
-                    <div class="history-actions">
-                        @if($history->status == 'failed')
-                            <form method="POST" action="{{ route('deepseek.retry', $history->id) }}" style="display: inline;">
-                                @csrf
-                                <button type="submit" class="icon-btn" title="Retry">
-                                    <i class="fas fa-redo-alt" style="color: #8b5cf6;"></i>
-                                </button>
-                            </form>
-                        @endif
-                        <button class="icon-btn" onclick="shareChat({{ $history->id }})" title="Share">
-                            <i class="fas fa-share-alt" style="color: #10b981;"></i>
-                        </button>
-                        <button class="icon-btn" onclick="deleteChat({{ $history->id }})" title="Delete">
-                            <i class="fas fa-trash" style="color: #ef4444;"></i>
-                        </button>
-                    </div>
-                </div>
-                <div style="margin-bottom: 10px;">
-                    <strong><i class="fas fa-user"></i> You:</strong>
-                    <p style="margin-top: 5px; opacity: 0.9;">{{ Str::limit($history->prompt, 200) }}</p>
-                </div>
-                <div>
-                    <strong><i class="fas fa-robot"></i> AI:</strong>
-                    <p style="margin-top: 5px; opacity: 0.9;">{{ Str::limit($history->response, 300) }}</p>
-                </div>
-                @if(strlen($history->response) > 300)
-                    <button class="btn btn-secondary" onclick="viewFullResponse({{ $history->id }})" style="margin-top: 10px; padding: 5px 12px; font-size: 12px;">
-                        <i class="fas fa-expand-alt"></i> View Full Response
-                    </button>
-                @endif
-            </div>
-        @empty
-            <div style="text-align: center; padding: 40px;">
-                <i class="fas fa-comments" style="font-size: 48px; opacity: 0.3;"></i>
-                <p style="margin-top: 15px;">No chat history found. Start a conversation with DeepSeek AI!</p>
-            </div>
-        @endforelse
-
-        <!-- Pagination -->
-        @if(method_exists($histories, 'links'))
-            <div class="pagination">
-                {{ $histories->appends(['search' => request('search'), 'filter' => request('filter')])->links() }}
-            </div>
-        @endif
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="modal">
-    <div class="modal-content">
-        <h3 style="margin-bottom: 15px;">Delete Chat History</h3>
-        <p>Are you sure you want to delete this conversation? This action cannot be undone.</p>
-        <div class="modal-buttons">
-            <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
-            <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
-        </div>
-    </div>
-</div>
-
-<!-- Share Modal -->
-<div id="shareModal" class="modal">
-    <div class="modal-content">
-        <h3 style="margin-bottom: 15px;">Share Conversation</h3>
-        <p>Share this conversation using the link below:</p>
-        <input type="text" id="shareLink" readonly style="width: 100%; margin: 15px 0; padding: 10px; border-radius: 8px; background: #334155; color: white; border: none;">
-        <div class="modal-buttons">
-            <button class="btn btn-secondary" onclick="closeShareModal()">Close</button>
-            <button class="btn btn-primary" onclick="copyShareLink()">Copy Link</button>
+{{-- Share Modal --}}
+<div class="modal-overlay" id="shareModal">
+    <div class="modal-box">
+        <h3>📤 Share Conversation</h3>
+        <p>Anyone with this link can view this conversation.</p>
+        <input type="text" class="modal-input" id="shareLink" readonly>
+        <div class="modal-btns">
+            <button class="modal-btn" onclick="closeShare()">Cancel</button>
+            <button class="modal-btn primary" onclick="copyShareLink()">
+                <i class="fas fa-copy"></i> Copy Link
+            </button>
         </div>
     </div>
 </div>
 
 <script>
-    let deleteChatId = null;
-    let currentShareId = null;
+const CSRF = document.querySelector('meta[name="csrf-token"]').content;
+const msgsWrap = document.getElementById('messages-wrap');
 
-    function showLoader(event) {
-        event.preventDefault();
-        document.getElementById('loader').style.display = 'block';
-        event.target.submit();
+// ── Scroll to bottom ─────────────────────────────────────────
+function scrollBottom() {
+    msgsWrap.scrollTop = msgsWrap.scrollHeight;
+}
+scrollBottom();
+
+// ── Theme ────────────────────────────────────────────────────
+function toggleTheme() {
+    const light = document.documentElement.classList.toggle('light');
+    document.getElementById('theme-btn').textContent = light ? '🌞' : '🌙';
+    localStorage.setItem('ds-theme', light ? 'light' : 'dark');
+}
+(function initTheme() {
+    if (localStorage.getItem('ds-theme') === 'light') {
+        document.documentElement.classList.add('light');
+        document.getElementById('theme-btn').textContent = '🌞';
     }
+})();
 
-    function copyText() {
-        let text = document.getElementById('aiText')?.innerText;
-        if (text) {
-            navigator.clipboard.writeText(text);
-            showNotification('Copied to clipboard!', 'success');
+// ── Model Badge ──────────────────────────────────────────────
+function updateModelBadge() {
+    const v = document.getElementById('model-selector').value;
+    document.getElementById('model-badge').textContent = v === 'deepseek-reasoner' ? 'R1' : 'Fast';
+}
+
+// ── Textarea auto-resize ─────────────────────────────────────
+const promptInput = document.getElementById('prompt-input');
+const charCount   = document.getElementById('char-count');
+
+promptInput.addEventListener('input', function () {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 140) + 'px';
+    const n = this.value.length;
+    charCount.textContent = n + ' / 5000';
+    charCount.className = n > 4500 ? 'warn' : '';
+});
+
+promptInput.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+
+function setPrompt(text) {
+    promptInput.value = text;
+    promptInput.dispatchEvent(new Event('input'));
+    promptInput.focus();
+}
+
+// ── Send / Stream ────────────────────────────────────────────
+function sendMessage() {
+    const prompt  = promptInput.value.trim();
+    if (!prompt) return;
+
+    const model   = document.getElementById('model-selector').value;
+    const sendBtn = document.getElementById('send-btn');
+
+    // Disable inputs
+    sendBtn.disabled = true;
+    promptInput.disabled = true;
+
+    // Hide welcome screen
+    const welcome = document.getElementById('welcome-screen');
+    if (welcome) welcome.style.display = 'none';
+
+    // Show streaming row
+    const streamRow = document.getElementById('stream-row');
+    const streamOut = document.getElementById('stream-output');
+    const typDots   = document.getElementById('typing-dots');
+    const streamAct = document.getElementById('stream-actions');
+    const streamMeta= document.getElementById('stream-user-meta');
+
+    document.getElementById('stream-user-text').textContent = prompt;
+    streamMeta.textContent = model + ' • Just now';
+    streamRow.style.display = 'block';
+    streamOut.textContent   = '';
+    streamOut.classList.add('streaming-cursor');
+    typDots.style.display   = 'flex';
+    streamAct.style.display = 'none';
+
+    scrollBottom();
+
+    // Fetch SSE stream
+    fetch('{{ route("deepseek.stream") }}', {
+        method:  'POST',
+        headers: {
+            'Content-Type':  'application/json',
+            'X-CSRF-TOKEN':  CSRF,
+            'Accept':        'text/event-stream',
+        },
+        body: JSON.stringify({ prompt, model }),
+    })
+    .then(res => {
+        const reader  = res.body.getReader();
+        const decoder = new TextDecoder();
+        let   buffer  = '';
+
+        typDots.style.display = 'none';
+
+        function read() {
+            reader.read().then(({ done, value }) => {
+                if (done) return;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop();
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    const raw = line.slice(6).trim();
+                    if (!raw) continue;
+
+                    try {
+                        const pkt = JSON.parse(raw);
+
+                        if (pkt.error) {
+                            streamOut.textContent += '\n\n⚠️ Error: ' + pkt.error;
+                            finishStream(sendBtn);
+                            return;
+                        }
+
+                        if (pkt.content) {
+                            streamOut.textContent += pkt.content;
+                            scrollBottom();
+                        }
+
+                        if (pkt.done) {
+                            finishStream(sendBtn);
+                            streamAct.style.display = 'flex';
+                            if (ttsEnabled) speakText(streamOut.innerText);
+                        }
+                    } catch(e) {}
+                }
+                read();
+            });
         }
-    }
+        read();
+    })
+    .catch(err => {
+        streamOut.textContent += '\n\n⚠️ Connection error: ' + err.message;
+        finishStream(sendBtn);
+    });
+}
 
-    function toggleMode() {
-        document.body.classList.toggle('light');
-        localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
-    }
+function finishStream(sendBtn) {
+    document.getElementById('stream-output').classList.remove('streaming-cursor');
+    document.getElementById('typing-dots').style.display = 'none';
+    sendBtn.disabled = false;
+    promptInput.disabled = false;
+    promptInput.value = '';
+    promptInput.style.height = 'auto';
+    charCount.textContent = '0 / 5000';
+    scrollBottom();
+}
 
-    // Load saved theme
-    if (localStorage.getItem('theme') === 'light') {
-        document.body.classList.add('light');
-    }
+// ── Voice Input ──────────────────────────────────────────────
+let recognition = null;
+let isRecording  = false;
 
-    function filterHistory(filter) {
-        window.location.href = '{{ route("deepseek.form") }}?filter=' + filter + '&search=' + encodeURIComponent('{{ request("search") }}');
+function toggleVoice() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+        alert('Voice input requires Chrome or Edge browser.');
+        return;
     }
+    isRecording ? stopVoice() : startVoice();
+}
 
-    function deleteChat(id) {
-        deleteChatId = id;
-        document.getElementById('deleteModal').style.display = 'flex';
-    }
+function startVoice() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SR();
+    recognition.lang = 'en-US';
+    recognition.continuous = false;
+    recognition.interimResults = true;
 
-    function confirmDelete() {
-        if (deleteChatId) {
-            window.location.href = '{{ url("deepseek/delete") }}/' + deleteChatId;
+    const vBtn = document.getElementById('voice-btn');
+    const vBar = document.getElementById('voice-bar');
+    const vTxt = document.getElementById('voice-bar-text');
+
+    recognition.onstart = () => {
+        isRecording = true;
+        vBtn.classList.add('recording');
+        vBtn.textContent = '⏹';
+        vBar.classList.add('show');
+        vTxt.textContent = 'Listening…';
+    };
+
+    recognition.onresult = (e) => {
+        let fin = '', int = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+            const t = e.results[i][0].transcript;
+            e.results[i].isFinal ? (fin += t) : (int += t);
         }
-    }
-
-    function confirmClearAll() {
-        if (confirm('⚠️ WARNING: This will delete ALL chat history. This action cannot be undone!\n\nAre you sure you want to continue?')) {
-            window.location.href = '{{ route("deepseek.clear") }}';
+        if (fin) {
+            promptInput.value += fin;
+            promptInput.dispatchEvent(new Event('input'));
+            vTxt.textContent = '✓ ' + fin;
+        } else {
+            vTxt.textContent = '… ' + int;
         }
-    }
+    };
 
-    function exportHistory() {
-        window.location.href = '{{ route("deepseek.export") }}';
-    }
+    recognition.onerror = (e) => { if (e.error !== 'no-speech') alert('Voice error: ' + e.error); stopVoice(); };
+    recognition.onend   = stopVoice;
+    recognition.start();
+}
 
-    function shareChat(id) {
-        currentShareId = id;
-        
-        fetch('{{ url("deepseek/share") }}/' + id, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('shareLink').value = data.share_url;
-            document.getElementById('shareModal').style.display = 'flex';
-        })
-        .catch(error => {
-            showNotification('Failed to generate share link', 'error');
-        });
-    }
+function stopVoice() {
+    isRecording = false;
+    try { recognition?.stop(); } catch(e) {}
+    const vBtn = document.getElementById('voice-btn');
+    vBtn.classList.remove('recording');
+    vBtn.textContent = '🎤';
+    setTimeout(() => document.getElementById('voice-bar').classList.remove('show'), 1200);
+}
 
-    function copyShareLink() {
-        const shareLink = document.getElementById('shareLink');
-        shareLink.select();
-        document.execCommand('copy');
-        showNotification('Share link copied to clipboard!', 'success');
-        closeShareModal();
-    }
+// ── Text-to-Speech ───────────────────────────────────────────
+let ttsEnabled = false;
 
-    function viewFullResponse(id) {
-        window.location.href = '{{ url("deepseek/result") }}/' + id;
-    }
+function toggleTTS() {
+    ttsEnabled = !ttsEnabled;
+    const btn = document.getElementById('tts-btn');
+    btn.textContent = ttsEnabled ? '🔇' : '🔊';
+    btn.classList.toggle('active', ttsEnabled);
+    if (!ttsEnabled) speechSynthesis.cancel();
+}
 
-    function closeModal() {
-        document.getElementById('deleteModal').style.display = 'none';
-        deleteChatId = null;
-    }
+function speakText(text) {
+    if (!window.speechSynthesis) return;
+    speechSynthesis.cancel();
+    const clean = text
+        .replace(/\*\*(.*?)\*\*/g, '$1')
+        .replace(/\*(.*?)\*/g, '$1')
+        .replace(/#{1,6}\s/g, '')
+        .replace(/`[^`]*`/g, '')
+        .substring(0, 2000);
+    const u = new SpeechSynthesisUtterance(clean);
+    u.lang = 'en-US'; u.rate = 1.0;
+    const voices = speechSynthesis.getVoices();
+    const best = voices.find(v => v.name.includes('Google') || v.lang === 'en-US');
+    if (best) u.voice = best;
+    const btn = document.getElementById('tts-btn');
+    u.onstart = () => { btn.textContent = '⏸'; btn.classList.add('active'); };
+    u.onend   = () => { btn.textContent = ttsEnabled ? '🔇' : '🔊'; if (!ttsEnabled) btn.classList.remove('active'); };
+    speechSynthesis.speak(u);
+}
 
-    function closeShareModal() {
-        document.getElementById('shareModal').style.display = 'none';
-        currentShareId = null;
-    }
+if (window.speechSynthesis) {
+    speechSynthesis.getVoices();
+    speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}
 
-    function showNotification(message, type) {
-        const alertDiv = document.createElement('div');
-        alertDiv.className = 'alert alert-' + type;
-        alertDiv.innerHTML = '<span><i class="fas fa-' + (type === 'success' ? 'check-circle' : 'exclamation-circle') + '"></i> ' + message + '</span><i class="fas fa-times" style="cursor: pointer;" onclick="this.parentElement.remove()"></i>';
-        document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
-        
-        setTimeout(() => {
-            alertDiv.remove();
-        }, 5000);
-    }
+// ── Copy ─────────────────────────────────────────────────────
+function copyText(elId) {
+    const text = document.getElementById(elId)?.innerText;
+    if (text) { navigator.clipboard.writeText(text); showToast('Copied!'); }
+}
 
-    // Close modals when clicking outside
-    window.onclick = function(event) {
-        const deleteModal = document.getElementById('deleteModal');
-        const shareModal = document.getElementById('shareModal');
-        if (event.target === deleteModal) closeModal();
-        if (event.target === shareModal) closeShareModal();
-    }
+// ── Share ─────────────────────────────────────────────────────
+function shareChat(id) {
+    fetch('/share/' + id, {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': CSRF, 'Content-Type': 'application/json' }
+    })
+    .then(r => r.json())
+    .then(d => {
+        document.getElementById('shareLink').value = d.share_url;
+        document.getElementById('shareModal').classList.add('show');
+    });
+}
+function copyShareLink() {
+    navigator.clipboard.writeText(document.getElementById('shareLink').value);
+    closeShare();
+    showToast('Share link copied!');
+}
+function closeShare() { document.getElementById('shareModal').classList.remove('show'); }
+window.addEventListener('click', e => {
+    if (e.target === document.getElementById('shareModal')) closeShare();
+});
 
-    // Auto-submit search on input (with debounce)
-    let searchTimeout;
-    const searchInput = document.querySelector('.search-box input');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(() => {
-                document.getElementById('searchForm').submit();
-            }, 500);
-        });
+// ── Clear All ─────────────────────────────────────────────────
+function confirmClearAll() {
+    if (confirm('⚠️ Delete ALL chat history? Cannot be undone.')) {
+        location.href = '{{ route("deepseek.clear") }}';
     }
+}
 
-    document.getElementById('confirmDeleteBtn')?.addEventListener('click', confirmDelete);
+// ── Toast ─────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+    const t = document.createElement('div');
+    t.style.cssText = `
+        position:fixed; bottom:22px; left:50%; transform:translateX(-50%);
+        padding:9px 20px; border-radius:9px; font-size:13px; z-index:9999;
+        background:${type === 'success' ? 'var(--green)' : 'var(--red)'}; color:#fff;
+        box-shadow:0 4px 18px rgba(0,0,0,.3); white-space:nowrap;
+    `;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2800);
+}
 </script>
 
 </body>
